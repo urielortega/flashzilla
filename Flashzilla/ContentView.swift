@@ -18,6 +18,7 @@ struct ContentView: View {
     @Environment(\.accessibilityDifferentiateWithoutColor) var differentiateWithoutColor
     @State private var cards = Array<Card>(repeating: Card.example, count: 10)
     
+    let defaultTime = 100
     @State private var timeRemaining = 100
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
     
@@ -31,13 +32,25 @@ struct ContentView: View {
                 .ignoresSafeArea()
             
             VStack {
-                Text("Time: \(timeRemaining)")
-                    .font(.largeTitle)
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 5)
-                    .background(.black.opacity(0.75))
-                    .clipShape(Capsule())
+                HStack {
+                    Text("Time: \(timeRemaining)")
+                        .font(.largeTitle)
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 5)
+                        .background(.black.opacity(0.75))
+                        .clipShape(Capsule())
+                    
+                    if timeRemaining == 0 {
+                        Button("Start again", action: resetCards)
+                            .padding()
+                            .background(.white)
+                            .foregroundColor(.black)
+                            .clipShape(Capsule())
+                            .padding()
+                            .animation(.default, value: timeRemaining)
+                    }
+                }
                 
                 ZStack {
                     ForEach(0..<cards.count, id: \.self) { index in
@@ -48,6 +61,16 @@ struct ContentView: View {
                         }
                         .stacked(at: index, in: cards.count)
                     }
+                }
+                .allowsHitTesting(timeRemaining > 0)
+                
+                if cards.isEmpty {
+                    Button("Start again", action: resetCards)
+                        .padding()
+                        .background(.white)
+                        .foregroundColor(.black)
+                        .clipShape(Capsule())
+                        .padding()
                 }
             }
             
@@ -76,12 +99,16 @@ struct ContentView: View {
             guard isActive else { return } // Do not count down if the app is in the background.
             
             if timeRemaining > 0 {
-                timeRemaining -= 1
+                withAnimation {
+                    timeRemaining -= 1
+                }
             }
         }
         .onChange(of: scenePhase) { newPhase in
             if newPhase == .active {
-                isActive = true
+                if !cards.isEmpty {
+                    isActive = true
+                }
             } else {
                 isActive = false
             }
@@ -90,6 +117,18 @@ struct ContentView: View {
     
     func removeCard(at index: Int) {
         cards.remove(at: index)
+        
+        if cards.isEmpty {
+            isActive = false
+        }
+    }
+    
+    func resetCards() {
+        withAnimation {
+            cards = Array<Card>(repeating: .example, count: 10)
+            timeRemaining = defaultTime
+            isActive = true
+        }
     }
 }
 
