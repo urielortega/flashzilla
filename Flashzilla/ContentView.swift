@@ -58,10 +58,12 @@ struct ContentView: View {
                 }
                 
                 ZStack {
-                    ForEach(0..<cards.count, id: \.self) { index in
-                        CardView(card: cards[index]) {
+                    ForEach(cards) { card in
+                        let index = cards.firstIndex(of: card)!
+                        
+                        CardView(card: card) { reinsert in
                             withAnimation {
-                                removeCard(at: index)
+                                removeCard(at: index, reinsert: reinsert)
                             }
                         }
                         .stacked(at: index, in: cards.count)
@@ -108,7 +110,7 @@ struct ContentView: View {
                     HStack {
                         Button {
                             withAnimation {
-                                removeCard(at: cards.count - 1)
+                                removeCard(at: cards.count - 1, reinsert: true)
                             }
                         } label: {
                             Image(systemName: "xmark.circle")
@@ -123,7 +125,7 @@ struct ContentView: View {
                         
                         Button {
                             withAnimation {
-                                removeCard(at: cards.count - 1)
+                                removeCard(at: cards.count - 1, reinsert: false)
                             }
                         } label: {
                             Image(systemName: "checkmark.circle")
@@ -173,11 +175,15 @@ struct ContentView: View {
         cards = [] // No saved data.
     }
     
-    func removeCard(at index: Int) {
+    func removeCard(at index: Int, reinsert: Bool) {
         guard index >= 0 else { return }
         
-        cards.remove(at: index)
-        
+        if reinsert {
+            cards.move(fromOffsets: IndexSet(integer: index), toOffset: 0)
+        } else {
+            cards.remove(at: index)
+        }
+                
         if cards.isEmpty {
             isActive = false
         }
