@@ -7,6 +7,18 @@
 
 import SwiftUI
 
+extension Shape {
+    func fill(using offset: CGSize) -> some View {
+        if offset.width == 0 {
+            return self.fill(.white)
+        } else if offset.width < 0 {
+            return self.fill(.red)
+        } else {
+            return self.fill(.green)
+        }
+    }
+}
+
 struct CardView: View {
     let card: Card
     var removal: (() -> Void)? = nil
@@ -31,10 +43,7 @@ struct CardView: View {
                     differentiateWithoutColor
                     ? nil
                     : RoundedRectangle(cornerRadius: 25, style: .continuous)
-                        .fill(
-                            offset.width == 0 ? .white
-                            : offset.width > 0 ? .green : .red
-                        )
+                        .fill(using: offset)
                 )
                 .shadow(radius: 10)
             
@@ -71,7 +80,7 @@ struct CardView: View {
                 }
                 .onEnded { _ in
                     if abs(offset.width) > 100 {
-                        if offset.width < 0 {
+                        if offset.width < 0 { // When swiping to mark as wrong answer...
                             feedback.notificationOccurred(.error)
                         }
                         
