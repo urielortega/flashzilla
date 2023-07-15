@@ -58,17 +58,15 @@ struct ContentView: View {
                 }
                 
                 ZStack {
-                    ForEach(cards) { card in
-                        let index = cards.firstIndex(of: card)!
-                        
-                        CardView(card: card) { reinsert in
+                    ForEach(Array(cards.enumerated()), id: \.element) { item in
+                        CardView(card: item.element) { reinsert in
                             withAnimation {
-                                removeCard(at: index, reinsert: reinsert)
+                                removeCard(at: item.offset, reinsert: reinsert)
                             }
                         }
-                        .stacked(at: index, in: cards.count)
-                        .allowsHitTesting(index == cards.count - 1)
-                        .accessibilityHidden(index < cards.count - 1)
+                        .stacked(at: item.offset, in: cards.count)
+                        .allowsHitTesting(item.offset == cards.count - 1)
+                        .accessibilityHidden(item.offset < cards.count - 1)
                     }
                 }
                 .allowsHitTesting(timeRemaining > 0)
