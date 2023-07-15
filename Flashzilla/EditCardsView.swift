@@ -14,6 +14,8 @@ struct EditCardsView: View {
     @State private var newPrompt = ""
     @State private var newAnswer = ""
     
+    @FocusState private var promptFocused: Bool
+    
     let saveKey = "SavedCards"
 
     var body: some View {
@@ -21,6 +23,7 @@ struct EditCardsView: View {
             List {
                 Section("Add new card") {
                     TextField("Prompt", text: $newPrompt)
+                        .focused($promptFocused)
                     TextField("Answer", text: $newAnswer)
                     Button("Add Card", action: addCard)
                         .disabled(newPrompt.isEmpty || newAnswer.isEmpty)
@@ -56,6 +59,10 @@ struct EditCardsView: View {
         let card = Card(prompt: trimmedPrompt, answer: trimmedAnswer)
         cards.insert(card, at: 0)
         saveData()
+        
+        promptFocused = true
+        newPrompt = ""
+        newAnswer = ""
     }
     
     func loadData() {
