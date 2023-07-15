@@ -17,7 +17,7 @@ extension View {
 struct ContentView: View {
     @Environment(\.accessibilityDifferentiateWithoutColor) var differentiateWithoutColor
     @Environment(\.accessibilityVoiceOverEnabled) var voiceOverEnabled
-    @State private var cards = [Card]()
+    @State private var cards = DataManager.load()
     
     let defaultTime = 100
     @State private var timeRemaining = 100
@@ -162,17 +162,6 @@ struct ContentView: View {
         .onAppear(perform: resetCards)
     }
     
-    func loadData() {
-        if let data = UserDefaults.standard.data(forKey: saveKey) {
-            if let decoded = try? JSONDecoder().decode([Card].self, from: data) {
-                cards = decoded
-                return
-            }
-        }
-        
-        cards = [] // No saved data.
-    }
-    
     func removeCard(at index: Int, reinsert: Bool) {
         guard index >= 0 else { return }
         
@@ -189,10 +178,10 @@ struct ContentView: View {
     
     func resetCards() {
         withAnimation {
-            cards = Array<Card>(repeating: .example, count: 10)
+            // cards = Array<Card>(repeating: .example, count: 10)
             timeRemaining = defaultTime
             isActive = true
-            loadData()
+            cards = DataManager.load()
         }
     }
 }
